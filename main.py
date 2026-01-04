@@ -10,17 +10,18 @@ from google import genai
 from pydantic import BaseModel, Field
 import streamlit as st
 import json
-from typing import Dict
+from typing import Dict, Optional
 import pandas as pd
 
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+base_path = Path('.')
+creds_path = base_path / 'creds'
+
 
 def autheticate_user() -> str:
     # Check for token.json. If it exists, load credentials from it.
     creds = None
-    base_path = Path('.')
-    creds_path = base_path / 'creds'
     token_file = creds_path / 'token.json'
     creds_file = creds_path / 'credentials.json'
     if token_file.exists():
@@ -111,6 +112,8 @@ def parse_emails(email_data) -> Dict[str, str]:
     # print(f"Clean Text: {clean_text}")
     cc_statement_details = get_cc_statement_details(clean_text)
     # print(f"CC Statement Details: {cc_statement_details.model_dump_json()}")
+    if cc_statement_details is None:
+        return {}
     cc_statement_data = {
         "subject": subject,
         "Total Amount Due (in INR)": cc_statement_details.total_amount_due,
@@ -127,8 +130,17 @@ class CCStatementDetails(BaseModel):
 
 
 @st.cache_data(ttl=24*60*60, show_spinner="Fetching CC statement details...")
-def get_cc_statement_details(cc_statement_text: str) -> CCStatementDetails:
-    client = genai.Client(api_key="AIzaSyAUcpN8vgUUE8tuj9Wh6WbOhBubvxDXilk")
+def get_cc_statement_details(cc_statement_text: str) -> Optional[CCStatementDetails]:
+    api_key = None
+    with open(creds_path / 'api_key.txt', 'r') as f:
+        api_key = json.load(f)
+        api_key = api_key['google-gemini']
+
+    if api_key is None:
+        st.error("❌ API key not found. Please add it to the api_key.txt file.")
+        return None
+    
+    client = genai.Client(api_key=api_key)
     prompt = f"""
     Extract the following information from the text:
     - Total amount due
