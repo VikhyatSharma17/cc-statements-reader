@@ -1,0 +1,15 @@
+[project]
+name = "cc-statements-reader"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "bs4>=0.0.2",
+    "google-api-python-client>=2.187.0",
+    "google-auth-httplib2>=0.3.0",
+    "google-auth-oauthlib>=1.2.3",
+    "google-genai>=1.55.0",
+    "pandas>=2.3.3",
+    "streamlit>=1.52.2",
+]
