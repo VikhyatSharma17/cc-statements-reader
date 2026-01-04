@@ -132,12 +132,12 @@ class CCStatementDetails(BaseModel):
 @st.cache_data(ttl=24*60*60, show_spinner="Fetching CC statement details...")
 def get_cc_statement_details(cc_statement_text: str) -> Optional[CCStatementDetails]:
     api_key = None
-    with open(creds_path / 'api_key.txt', 'r') as f:
+    with open(creds_path / 'api_key.json', 'r') as f:
         api_key = json.load(f)
         api_key = api_key['google-gemini']
 
     if api_key is None:
-        st.error("❌ API key not found. Please add it to the api_key.txt file.")
+        st.error("❌ API key not found. Please add it to the api_key.json file.")
         return None
     
     client = genai.Client(api_key=api_key)
